@@ -72,7 +72,7 @@ namespace EliteScreenshots
                 string context = VA.Context.ToLower();
                 if (context == "convertold")
                 {
-                    // FIXXME: method to convert old, existing bitmaps in the screenshts folder
+                    // FIXXME: method to convert old, existing bitmaps in the screenshots folder
                 }
                 else
                 {
@@ -129,6 +129,12 @@ namespace EliteScreenshots
                 };
                 sb.Replace($"%{token}%", value);
             }
+
+            foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+            {
+                sb.Replace(c, '_');
+            }
+
             string outputDirectory = VA!.GetText("EliteScreenshots.outputDirectory#") ?? defaultOutputDirectory;
             string targetFilename = Path.Combine(outputDirectory, $"{sb}{(highres ? "-highres" : "")}.png");
 
@@ -151,7 +157,7 @@ namespace EliteScreenshots
 
         private static string ConvertAndMove(string file, bool highres = false)
         {
-            string target = getTargetFileName();
+            string target = getTargetFileName(highres);
 
             using (Bitmap bm = new Bitmap(file)) { 
                 bm.Save(target, ImageFormat.Png);
@@ -171,6 +177,7 @@ namespace EliteScreenshots
             }
             if (name == "EliteScreenshots.outputDirectory#")
             {
+                // FIXXME check if it exists
                 LogInfo($"Output directory changed to '{to}'.");
             }
         }
