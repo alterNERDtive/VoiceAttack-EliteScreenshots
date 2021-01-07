@@ -34,7 +34,8 @@ variable in VoiceAttack.
 
 ### File Name Template
 
-The default file name for screenshots is `%datetime%-%cmdr%-%system%-%body%.png`.
+The default file name for screenshots is `%datetime%-%cmdr%-%system%-%body%`
+(plus the `.png` extension).
 
 You can set your own file name template by setting the `EliteScreenshots.format#`
 text variable in VoiceAttack.
