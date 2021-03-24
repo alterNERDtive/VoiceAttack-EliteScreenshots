@@ -5,13 +5,10 @@ bitmaps in your “Pictures” folder. There are many tools to automatically
 convert, move and rename those. This one is a
 [VoiceAttack](https://voiceattack.com) plugin.
 
-**Notice**: In order to use ingame information like your CMDR name or your
+**Note**: In order to use ingame information like your CMDR name or your
 current system in the output file name **you will have to use
 [EDDI](https://github.com/EDCD/EDDI)** and [install it as a VoiceAttack
 plugin](https://github.com/EDCD/EDDI/wiki/VoiceAttack-Integration#using-eddi-with-voiceattack).
-
-Note for advanced users: Instead of _installing_ EDDI to VoiceAttack’s `Apps`
-directory you can install it in an arbitrary location and symlink it there.
 
 ## Install
 
@@ -40,7 +37,7 @@ The default file name for screenshots is `%datetime%-%cmdr%-%system%-%body%`
 You can set your own file name template by setting the `EliteScreenshots.format#`
 text variable in VoiceAttack.
 
-The following placeholders will automatically replaced by the corresponding values.
+The following tokens will automatically replaced by the corresponding values.
 
 * `%body%`: the stellar object in which sphere of influence you currently are
 * `%cmdr%`: your current CMDR name
@@ -54,8 +51,7 @@ The following placeholders will automatically replaced by the corresponding valu
 ## Converting Old Screenhots
 
 On startup the plugin will inform you if it finds older screenshots. You can run
-the `convertold` plugin context (FIXXME: or import and select the included
-profile) to batch convert them .
+the `convertold` plugin context to batch convert them .
 
 ## Need Help / Want to Contribute?
 
