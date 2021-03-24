@@ -162,6 +162,9 @@ namespace EliteScreenshots
             using (Bitmap bm = new Bitmap(file)) { 
                 bm.Save(target, ImageFormat.Png);
             }
+
+            LogInfo($"Saved new{(highres ? " high resolution" : "")} screen shot to '{target}'.");
+
             File.Delete(file);
 
             return target;
@@ -189,12 +192,11 @@ namespace EliteScreenshots
             {
                 if (standardRegex.IsMatch(name))
                 {
-                    LogInfo($"New screenshot found, moving to '{ConvertAndMove(Path.Combine(screenshotsDirectory, name))}'");
+                    ConvertAndMove(Path.Combine(screenshotsDirectory, name));
                 }
                 else if (highResRegex.IsMatch(name))
                 {
-                    
-                    LogInfo($"New high resolution screenshot found, moving to '{ConvertAndMove(Path.Combine(screenshotsDirectory, name))}'");
+                    ConvertAndMove(Path.Combine(screenshotsDirectory, name), true);
                 }
                 else
                 {
