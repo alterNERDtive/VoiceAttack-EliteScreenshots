@@ -196,6 +196,11 @@ namespace EliteScreenshots
                 }
                 else if (highResRegex.IsMatch(name))
                 {
+                    // This is ugly AF …
+                    // But I have to wait for Elite to finish writing, and no,
+                    // I have not been able to find a viable alternative to this
+                    // that would be less ugly.
+                    Thread.Sleep(5000);
                     ConvertAndMove(Path.Combine(screenshotsDirectory, name), true);
                 }
                 else
