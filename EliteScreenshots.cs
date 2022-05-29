@@ -1,4 +1,23 @@
-﻿#nullable enable
+﻿// <copyright file="EliteScreenshots.cs" company="alterNERDtive">
+// Copyright 2021–2022 alterNERDtive.
+//
+// This file is part of VoiceAttack EliteScreenshots plugin.
+//
+// VoiceAttack EliteScreenshots plugin is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// VoiceAttack EliteScreenshots plugin is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with VoiceAttack EliteScreenshots plugin.  If not, see &lt;https://www.gnu.org/licenses/&gt;.
+// </copyright>
+
+#nullable enable
 
 using System;
 using System.Drawing;
@@ -11,16 +30,23 @@ using System.Threading;
 
 namespace EliteScreenshots
 {
+    /// <summary>
+    /// VoiceAttack plugin that automatically detects, converts and moves
+    /// screenshots created by Elite Dangerous in the background.
+    /// </summary>
     public class EliteScreenshots
     {
-        private static dynamic? VA;
-        private static readonly string screenshotsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), @"Frontier Developments\Elite Dangerous");
-        private static readonly string defaultFormat = "%datetime%-%cmdr%-%system%-%body%";
-        private static readonly string defaultOutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        private static readonly string ScreenshotsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), @"Frontier Developments\Elite Dangerous");
+        private static readonly string DefaultFormat = "%datetime%-%cmdr%-%system%-%body%";
+        private static readonly string DefaultOutputDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
 
-        private static readonly Regex standardRegex = new Regex(@"^Screenshot_\d{4}\.bmp$");
-        private static readonly Regex highResRegex = new Regex(@"^HighResScreenShot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}.bmp$");
-        private static readonly Regex tokenRegex = new Regex(@"%(?<token>[\w: \-\.]*)%");
+        private static readonly Regex StandardRegex = new (@"^Screenshot_\d{4}\.bmp$");
+        private static readonly Regex HighResRegex = new (@"^HighResScreenShot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}.bmp$");
+        private static readonly Regex TokenRegex = new (@"%(?<token>[\w: \-\.]*)%");
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1306:Field names should begin with lower-case letter", Justification = "just cause")]
+        private static dynamic? VA;
+        private static FileSystemWatcher? fileWatcher;
 
         private static FileSystemWatcher FileWatcher
         {
@@ -28,22 +54,40 @@ namespace EliteScreenshots
             {
                 if (fileWatcher == null)
                 {
-                    fileWatcher = new FileSystemWatcher(screenshotsDirectory);
-                    fileWatcher.Created += (source, EventArgs) => { FileChangedHandler(EventArgs); };
+                    fileWatcher = new FileSystemWatcher(ScreenshotsDirectory);
+                    fileWatcher.Created += (source, eventArgs) => { FileChangedHandler(eventArgs); };
                 }
+
                 return fileWatcher!;
             }
         }
-        private static FileSystemWatcher? fileWatcher;
 
-        public static string VERSION = "0.1";
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "nicer grouping")]
+        private static readonly Version VERSION = new ("0.1");
 
+        /// <summary>
+        /// The plugin’s display name, as required by the VoiceAttack plugin API.
+        /// </summary>
+        /// <returns>The display name.</returns>
         public static string VA_DisplayName() => $"EliteScreenshots Plugin {VERSION}";
 
+        /// <summary>
+        /// The plugin’s description, as required by the VoiceAttack plugin API.
+        /// </summary>
+        /// <returns>The description.</returns>
         public static string VA_DisplayInfo() => VA_DisplayName();
 
+        /// <summary>
+        /// The plugin’s GUID, as required by the VoiceAtatck plugin API.
+        /// </summary>
+        /// <returns>The GUID.</returns>
         public static Guid VA_Id() => new Guid("{252490FD-2E6F-4703-900B-02ED98D717C2}");
 
+        /// <summary>
+        /// The Init method, as required by the VoiceAttack plugin API.
+        /// Runs when the plugin is initially loaded.
+        /// </summary>
+        /// <param name="vaProxy">The VoiceAttack proxy object.</param>
         public static void VA_Init1(dynamic vaProxy)
         {
             VA = vaProxy;
@@ -54,10 +98,9 @@ namespace EliteScreenshots
             try
             {
                 // inform about old shots
-
-                DirectoryInfo dirInfo = new DirectoryInfo(screenshotsDirectory);
-                int standardCount = dirInfo.GetFiles().Where(file => standardRegex.IsMatch(file.Name)).Count();
-                int highResCount = dirInfo.GetFiles().Where(file => highResRegex.IsMatch(file.Name)).Count();
+                DirectoryInfo dirInfo = new DirectoryInfo(ScreenshotsDirectory);
+                int standardCount = dirInfo.GetFiles().Where(file => StandardRegex.IsMatch(file.Name)).Count();
+                int highResCount = dirInfo.GetFiles().Where(file => HighResRegex.IsMatch(file.Name)).Count();
 
                 if (standardCount > 0 && highResCount > 0)
                 {
@@ -87,6 +130,11 @@ namespace EliteScreenshots
             }
         }
 
+        /// <summary>
+        /// The Invoke method, as required by the VoiceAttack plugin API.
+        /// Runs whenever a plugin context is invoked.
+        /// </summary>
+        /// <param name="vaProxy">The VoiceAttack proxy object.</param>
         public static void VA_Invoke1(dynamic vaProxy)
         {
             VA = vaProxy;
@@ -108,9 +156,24 @@ namespace EliteScreenshots
             }
         }
 
-        public static void VA_StopCommand() { }
+        /// <summary>
+        /// The Exit method, as required by the VoiceAttack plugin API.
+        /// Runs when VoiceAttack is shut down.
+        /// </summary>
+        /// <param name="vaProxy">The VoiceAttack proxy object.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "required by VoiceAttack plugin API")]
+        public static void VA_Exit1(dynamic vaProxy)
+        {
+        }
 
-        public static void VA_Exit1(dynamic vaProxy) { }
+        /// <summary>
+        /// The StopCommand method, as required by the VoiceAttack plugin API.
+        /// Runs whenever all commands are stopped using the “Stop All Commands”
+        /// button or action.
+        /// </summary>
+        public static void VA_StopCommand()
+        {
+        }
 
         private static void LogError(string message)
         {
@@ -126,15 +189,15 @@ namespace EliteScreenshots
         {
             VA!.WriteToLog($"WARN | EliteScreenshots: {message}", "yellow");
         }
-        
-        private static string getTargetFileName(bool highres = false, string? fromFile = null)
+
+        private static string GetTargetFileName(bool highres = false, string? fromFile = null)
         {
-            StringBuilder sb = new StringBuilder(VA!.GetText("EliteScreenshots.format#") ?? defaultFormat);
-            MatchCollection matches = tokenRegex.Matches(sb.ToString());
+            StringBuilder sb = new StringBuilder(VA!.GetText("EliteScreenshots.format#") ?? DefaultFormat);
+            MatchCollection matches = TokenRegex.Matches(sb.ToString());
 
             string token;
             string value;
-            if (String.IsNullOrEmpty(fromFile))
+            if (string.IsNullOrEmpty(fromFile))
             {
                 foreach (Match match in matches)
                 {
@@ -183,8 +246,8 @@ namespace EliteScreenshots
                 sb.Replace(c, '_');
             }
 
-            string outputDirectory = VA!.GetText("EliteScreenshots.outputDirectory#") ?? defaultOutputDirectory;
-            string targetFilename = Path.Combine(outputDirectory, $"{sb}{(highres ? "-highres" : "")}.png");
+            string outputDirectory = VA!.GetText("EliteScreenshots.outputDirectory#") ?? DefaultOutputDirectory;
+            string targetFilename = Path.Combine(outputDirectory, $"{sb}{(highres ? "-highres" : string.Empty)}.png");
 
             if (File.Exists(targetFilename))
             {
@@ -193,9 +256,10 @@ namespace EliteScreenshots
                 string newFileName;
                 do
                 {
-                    newFileName = Path.Combine(outputDirectory, $"{sb}{(highres ? "-highres" : "")}_{i:D4}.png");
+                    newFileName = Path.Combine(outputDirectory, $"{sb}{(highres ? "-highres" : string.Empty)}_{i:D4}.png");
                     i++;
-                } while (File.Exists(newFileName));
+                }
+                while (File.Exists(newFileName));
 
                 targetFilename = newFileName;
             }
@@ -205,33 +269,36 @@ namespace EliteScreenshots
 
         private static string ConvertAndMove(string source, string? target = null, bool highres = false)
         {
-            target ??= getTargetFileName(highres);
+            target ??= GetTargetFileName(highres);
 
-            using (Bitmap bm = new Bitmap(source)) { 
+            using (Bitmap bm = new Bitmap(source))
+            {
                 bm.Save(target, ImageFormat.Png);
             }
 
-            LogInfo($"Saved{(highres ? " high resolution" : "")} screenshot to '{target}'.");
+            LogInfo($"Saved{(highres ? " high resolution" : string.Empty)} screenshot to '{target}'.");
 
             File.Delete(source);
 
             return target;
         }
 
-        private static void ConvertOldShots ()
+        private static void ConvertOldShots()
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(screenshotsDirectory);
-            foreach (FileInfo fileInfo in dirInfo.GetFiles().Where(file => standardRegex.IsMatch(file.Name)).ToList())
+            DirectoryInfo dirInfo = new (ScreenshotsDirectory);
+
+            foreach (FileInfo fileInfo in dirInfo.GetFiles().Where(file => StandardRegex.IsMatch(file.Name)).ToList())
             {
-                ConvertAndMove(fileInfo.FullName, target: getTargetFileName(fromFile: fileInfo.FullName));
+                ConvertAndMove(fileInfo.FullName, target: GetTargetFileName(fromFile: fileInfo.FullName));
             }
-            foreach (FileInfo fileInfo in dirInfo.GetFiles().Where(file => highResRegex.IsMatch(file.Name)).ToList())
+
+            foreach (FileInfo fileInfo in dirInfo.GetFiles().Where(file => HighResRegex.IsMatch(file.Name)).ToList())
             {
-                ConvertAndMove(fileInfo.FullName, target: getTargetFileName(fromFile: fileInfo.FullName, highres: true), highres: true);
+                ConvertAndMove(fileInfo.FullName, target: GetTargetFileName(fromFile: fileInfo.FullName, highres: true), highres: true);
             }
         }
 
-        public static void TextVariableChanged(string name, string from, string to, Guid? internalID)
+        private static void TextVariableChanged(string name, string from, string to, Guid? internalID = null)
         {
             if (name == "EliteScreenshots.format#")
             {
@@ -239,6 +306,7 @@ namespace EliteScreenshots
                 // (or just give example output along with it?)
                 LogInfo($"Output format changed to '{to}'.");
             }
+
             if (name == "EliteScreenshots.outputDirectory#")
             {
                 // FIXXME check if it exists
@@ -251,18 +319,18 @@ namespace EliteScreenshots
             string name = eventArgs.Name;
             try
             {
-                if (standardRegex.IsMatch(name))
+                if (StandardRegex.IsMatch(name))
                 {
-                    ConvertAndMove(Path.Combine(screenshotsDirectory, name));
+                    ConvertAndMove(Path.Combine(ScreenshotsDirectory, name));
                 }
-                else if (highResRegex.IsMatch(name))
+                else if (HighResRegex.IsMatch(name))
                 {
                     // This is ugly AF …
                     // But I have to wait for Elite to finish writing, and no,
                     // I have not been able to find a viable alternative to this
                     // that would be less ugly.
                     Thread.Sleep(5000);
-                    ConvertAndMove(Path.Combine(screenshotsDirectory, name), highres: true);
+                    ConvertAndMove(Path.Combine(ScreenshotsDirectory, name), highres: true);
                 }
                 else
                 {
