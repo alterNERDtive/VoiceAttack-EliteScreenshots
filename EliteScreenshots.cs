@@ -93,7 +93,7 @@ namespace EliteScreenshots
             VA = vaProxy;
             VA.TextVariableChanged += new Action<string, string, string, Guid?>(TextVariableChanged);
 
-            VA.SetText("EliteScreenshots.version", VERSION);
+            VA.SetText("EliteScreenshots.version", VERSION.ToString());
 
             try
             {
