@@ -28,3 +28,4 @@ jobs:
           artifacts: "VoiceAttack-EliteScreenshots.zip"
           bodyFile: "CHANGELOG.md"
           draft: true
+          token: ${{ secrets.RELEASE_TOKEN }}
